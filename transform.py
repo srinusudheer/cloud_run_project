@@ -36,8 +36,41 @@ def transform_data(order: dict) -> list[dict]:
             "item_name": item["name"],
             "item_qty": item["qty"],
             "item_unit_price": float(item["unit_price"])
+
         }
         transformed_rows.append(row)
     
 
     return transformed_rows
+
+# order = {
+#   "order_id":      "ORD-20250426-1001",
+#   "customer_id":   "CUST-100234",
+#   "order_date":    "2025-04-26T22:30:45Z",
+#   "source":        "web_portal",
+#   "items": [
+#     {
+#       "sku":         "WM-12345",
+#       "name":        "Wireless Ergonomic Mouse",
+#       "qty":         2,
+#       "unit_price":  25.99
+#     },
+#     {
+#       "sku":         "KB-67890",
+#       "name":        "Mechanical Gaming Keyboard",
+#       "qty":         1,
+#       "unit_price":  79.99
+#     }
+#   ],
+#   "shipping_address": {
+#     "line1":       "123 Tech Park Rd",
+#     "line2":       "Suite 400",
+#     "city":        "San Francisco",
+#     "state":       "CA",
+#     "postal_code": "94107",
+#     "country":     "USA"
+#   },
+#   "payment_method": "credit_card",
+#   "total_amount":   131.97
+# }
+# print(transform_data(order))
