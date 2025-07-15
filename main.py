@@ -75,6 +75,7 @@ def order_event(request):
                 table = bigquery.Table(table_id, schema=schema)
                 client.create_table(table)
                 print(f"✅ Table {table_id} created.")
+
         client = bigquery.Client()
         table_id = os.environ.get("BQ_TABLE")
 
@@ -103,7 +104,7 @@ def order_event(request):
 
 
     except Exception as e:
-        logger.error("Failed to write data to BigQuery: %s", e)
+        logger.error("Failed to write data to BigQuery table : %s", e)
         return make_response(jsonify({"error": "Failed to write data to BigQuery"}), 500)
     
 
