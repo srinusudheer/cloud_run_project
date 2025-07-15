@@ -3,3 +3,5 @@ flask
 pydantic
 google-cloud-bigquery
 google-cloud-core
+google.api_core
+google-cloud-storage
