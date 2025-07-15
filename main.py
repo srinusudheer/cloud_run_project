@@ -66,7 +66,7 @@ def order_event(request):
         #     logger.info("Data written to BigQuery successfully")
         #write_to_bigquery(enriched)
         
-        def ensure_table_exists(client, table_id, schema):
+        def ensure_table_exists(client, table_id, schema, rows_to_insert):
             try:
                 client.get_table(table_id)  # Check if table exists
                 print(f"✅ Table {table_id} exists.")
@@ -75,6 +75,10 @@ def order_event(request):
                 table = bigquery.Table(table_id, schema=schema)
                 client.create_table(table)
                 print(f"✅ Table {table_id} created.")
+            errors = client.insert_rows_json(table_id, rows_to_insert)
+            if errors:
+                raise RuntimeError(f"❌ Failed to insert rows: {errors}")
+            print(f"✅ Data inserted successfully into {table_id}")
 
         client = bigquery.Client()
         table_id = os.environ.get("BQ_TABLE")
@@ -100,7 +104,7 @@ def order_event(request):
         bigquery.SchemaField("processed_at", "TIMESTAMP")
         ]
 
-        ensure_table_exists(client, table_id, schema)
+        ensure_table_exists(client, table_id, schema,enriched)
 
 
     except Exception as e:
