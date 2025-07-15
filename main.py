@@ -15,7 +15,7 @@ import os
 logger = logging.getLogger('order_service')
 logger.setLevel(logging.INFO)
 
-if not logger.handlers: # Prevents duplicate handlers if the logger is configured multiple times.
+if not logger.handlers: # Prevents duplicate handlers if the logger is configured multiple times updating the code here.
 
     h = logging.StreamHandler() # Creates a handler that writes logs to the console (stdout).
     h.setFormatter(logging.Formatter(
