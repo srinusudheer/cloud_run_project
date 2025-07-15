@@ -109,19 +109,25 @@ def order_event(request):
     
 
     resp = {
-        "status":           "processed",
-        "order_id":         enriched["order_id"],
-        "processing_id":    enriched["processing_id"],
-        "processed_at":     enriched["processed_at"],
-        "items_count":      len(enriched["items"]),
-        "total_amount":     enriched["total_amount"],
-        "payment_method":   enriched["payment_method"],
-        "shipping_address": enriched["shipping_address"],
-        "message":          "Order received and stored."
-
-    }
-    logger.info("Order %s processed successfully after git changes in the validate code", enriched["order_id"])
-    return make_response(jsonify(resp), 200)
+    "status":           "processed",
+    "order_id":         enriched[0]["order_id"],
+    "processing_id":    enriched[0]["processing_id"],
+    "processed_at":     enriched[0]["processed_at"],
+    "items_count":      len(enriched),
+    "total_amount":     enriched[0]["total_amount"],
+    "payment_method":   enriched[0]["payment_method"],
+    "shipping_address": {
+        "line1":        enriched[0]["shipping_line1"],
+        "line2":        enriched[0]["shipping_line2"],
+        "city":         enriched[0]["shipping_city"],
+        "state":        enriched[0]["shipping_state"],
+        "postal_code":  enriched[0]["shipping_postal_code"],
+        "country":      enriched[0]["shipping_country"],
+    },
+    "message": "Order received and stored."
+ }
+    logger.info("Order %s processed successfully after git changes in the validate code", enriched[0]["order_id"])
+    return make_response(jsonify(resp  ), 200)
     #return make_response(jsonify({"message": "Order processed successfully"}), 200) 
    
 
