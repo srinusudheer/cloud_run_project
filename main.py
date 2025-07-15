@@ -104,7 +104,7 @@ def order_event(request):
 
 
     except Exception as e:
-        logger.error("Failed to write data to BigQuery table : %s", e)
+        logger.error("Failed to write data to BigQuery table:", e)
         return make_response(jsonify({"error": "Failed to write data to BigQuery"}), 500)
     
 
@@ -120,7 +120,7 @@ def order_event(request):
         "message":          "Order received and stored."
 
     }
-    logger.info("Order %s processed successfully after git changes made to original code", enriched["order_id"])
+    logger.info("Order %s processed successfully after git changes in the validate code", enriched["order_id"])
     return make_response(jsonify(resp), 200)
     #return make_response(jsonify({"message": "Order processed successfully"}), 200) 
    

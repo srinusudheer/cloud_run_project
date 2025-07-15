@@ -28,8 +28,6 @@ class Order(BaseModel):
 
 
 import json
-from pyspark.sql.functions import udf
-from pyspark.sql.types import BooleanType
 
 
 def validate_order_udf(order_dict):
