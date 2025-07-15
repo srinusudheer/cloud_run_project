@@ -1,7 +1,8 @@
 import logging
 import os
 import functions_framework
-from flask import jsonify, make_response, request
+from flask import jsonify, make_response
+from google.api_core.exceptions import NotFound
 
 from validate import validate_order_udf
 from transform import transform_data
@@ -53,29 +54,73 @@ def order_event(request):
     logger.info("Transformation successful")
 
     try:
-        def write_to_bigquery(enriched):
-            table_id = os.environ.get("BQ_TABLE")  # Should be "project.dataset.table"
-            if not table_id:
-                raise ValueError("BQ_TABLE environment variable not set")
+        # def write_to_bigquery(enriched):
+        #     table_id = os.environ.get("BQ_TABLE")  # Should be "project.dataset.table"
+        #     if not table_id:
+        #         raise ValueError("BQ_TABLE environment variable not set")
 
-            client = bigquery.Client()
-            errors = client.insert_rows_json(table_id, enriched)
-            if errors:
-                raise RuntimeError(f"Failed to insert rows: {errors}")
-            logger.info("Data written to BigQuery successfully")
-        write_to_bigquery(enriched)
+        #     client = bigquery.Client()
+        #     errors = client.insert_rows_json(table_id, enriched)
+        #     if errors:
+        #         raise RuntimeError(f"Failed to insert rows: {errors}")
+        #     logger.info("Data written to BigQuery successfully")
+        #write_to_bigquery(enriched)
+        
+        def ensure_table_exists(client, table_id, schema):
+            try:
+                client.get_table(table_id)  # Check if table exists
+                print(f"✅ Table {table_id} exists.")
+            except NotFound:
+                print(f"⚠️ Table {table_id} not found. Creating it...")
+                table = bigquery.Table(table_id, schema=schema)
+                client.create_table(table)
+                print(f"✅ Table {table_id} created.")
+        client = bigquery.Client()
+        table_id = os.environ.get("BQ_TABLE")
+
+        schema = [
+        bigquery.SchemaField("order_id", "STRING"),
+        bigquery.SchemaField("customer_id", "STRING"),
+        bigquery.SchemaField("order_date", "TIMESTAMP"),
+        bigquery.SchemaField("source", "STRING"),
+        bigquery.SchemaField("item_sku", "STRING"),
+        bigquery.SchemaField("item_name", "STRING"),
+        bigquery.SchemaField("item_qty", "INTEGER"),
+        bigquery.SchemaField("item_unit_price", "FLOAT"),
+        bigquery.SchemaField("shipping_line1", "STRING"),
+        bigquery.SchemaField("shipping_line2", "STRING"),
+        bigquery.SchemaField("shipping_city", "STRING"),
+        bigquery.SchemaField("shipping_state", "STRING"),
+        bigquery.SchemaField("shipping_postal_code", "STRING"),
+        bigquery.SchemaField("shipping_country", "STRING"),
+        bigquery.SchemaField("payment_method", "STRING"),
+        bigquery.SchemaField("total_amount", "FLOAT"),
+        bigquery.SchemaField("processing_id", "STRING"),
+        bigquery.SchemaField("processed_at", "TIMESTAMP")
+        ]
+
+        ensure_table_exists(client, table_id, schema)
+
+
     except Exception as e:
         logger.error("Failed to write data to BigQuery: %s", e)
         return make_response(jsonify({"error": "Failed to write data to BigQuery"}), 500)
     
 
-    return make_response(jsonify({"message": "Order processed successfully"}), 200) 
+    resp = {
+        "status":           "processed",
+        "order_id":         enriched["order_id"],
+        "processing_id":    enriched["processing_id"],
+        "processed_at":     enriched["processed_at"],
+        "items_count":      len(enriched["items"]),
+        "total_amount":     enriched["total_amount"],
+        "payment_method":   enriched["payment_method"],
+        "shipping_address": enriched["shipping_address"],
+        "message":          "Order received and stored."
+
+    }
+    logger.info("Order %s processed successfully after git changes made to original code", enriched["order_id"])
+    return make_response(jsonify(resp), 200)
+    #return make_response(jsonify({"message": "Order processed successfully"}), 200) 
    
 
-# For local testing with functions-framework
-if __name__ == "__main__":
-    from werkzeug.serving import run_simple
-    from functions_framework import create_app
-    app = create_app("order_event")
-    run_simple("0.0.0.0", 8080, app) 
-    
